@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PW Backlog Planner | Aesthetic Study Operating System</title>
+  
+  <!-- Modern Typography & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            obsidian: {
+              950: '#090514', // Deep Midnight Purple
+              900: '#110C24',
+              850: '#1A1235',
+              800: '#261C48',
+              700: '#3A2C68',
+              600: '#52408C',
+            },
+            accent: {
+              violet: '#6366F1', // Neon Indigo Primary
+              cyan: '#EC4899',   // Hot Pink Secondary
+              emerald: '#06B6D4',// Cyan Highlight
+              rose: '#F43F5E',
+              amber: '#10B981'   // Emerald
+            }
+          },
+          boxShadow: {
+            'glow-violet': '0 0 35px -5px rgba(99, 102, 241, 0.4)',
+            'glow-cyan': '0 0 35px -5px rgba(236, 72, 153, 0.4)',
+            'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.5)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Aesthetics & Glassmorphic Utilities */
+    body {
+      background-color: #090514;
+      color: #F8FAFC;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .glass-card {
+      background: rgba(26, 18, 53, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-3px);
+      background: rgba(38, 28, 72, 0.85);
+      border-color: rgba(236, 72, 153, 0.4);
+      box-shadow: 0 12px 40px -10px rgba(236, 72, 153, 0.25);
+    }
+
+    .glass-nav {
+      background: rgba(17, 12, 36, 0.82);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+    /* Ambient Background Mesh Spheres */
+    .orb-1 {
+      position: fixed;
+      top: -10%;
+      right: -5%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+      pointer-events: none;
+      z-index: -10;
+      animation: float-slow 18s ease-in-out infinite alternate;
+    }
+
+    .orb-2 {
+      position: fixed;
+      bottom: -15%;
+      left: -10%;
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.22) 0%, rgba(0, 0, 0, 0) 70%);
+      pointer-events: none;
+      z-index: -10;
+      animation: float-slow 22s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes float-slow {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, 40px) scale(1.05); }
+      100% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+
+    /* Circular SVG Timer Ring Styling */
+    .timer-ring-circle {
+      transition: stroke-dashoffset 1s linear;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #050508; }
+    ::-webkit-scrollbar-thumb { background: #1F2133; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #8B5CF6; }
+  </style>
+</head>
+
+<body class="min-h-screen text-slate-100 selection:bg-accent-violet selection:text-white relative">
+
+  <!-- Ambient Light Orbs -->
+  <div class="orb-1"></div>
+  <div class="orb-2"></div>
+
+  <!-- Navigation Header -->
+  <header class="fixed top-0 left-0 w-full z-40 glass-nav px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3">
+        <img src="logo.png" alt="PW Backlog Planner Logo" class="w-10 h-10 rounded-xl object-cover border border-accent-violet/40 shadow-glow-violet">
+        <div>
+          <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">PW Backlog Planner</h1>
+          <p class="text-[11px] text-slate-400 font-medium">Curriculum Operating System</p>
+        </div>
+      </div>
+
+      <!-- Center Status Badges -->
+      <div class="hidden md:flex items-center gap-3">
+        <div id="extension-status-badge" class="px-3.5 py-1.5 rounded-full bg-obsidian-800/80 border border-slate-700/50 text-xs font-semibold flex items-center gap-2">
+          <span id="status-pulse-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+          <span id="status-badge-text" class="text-slate-300">Auto Sync Disconnected</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <button id="btn-trigger-sync" class="px-4 py-2 rounded-xl bg-obsidian-800 hover:bg-obsidian-700 border border-slate-700/60 text-xs font-bold text-slate-200 transition-all flex items-center gap-2 hover:border-accent-violet/50">
+          <i data-lucide="refresh-cw" class="w-4 h-4 text-accent-violet"></i> Sync Now
+        </button>
+        <button id="btn-load-sample" class="px-4 py-2 rounded-xl bg-gradient-to-r from-accent-violet to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold shadow-glow-violet transition-all active:scale-95 flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Load Demo
+        </button>
+        <button id="btn-reset-all" class="p-2 rounded-xl bg-obsidian-800 hover:bg-rose-500/10 border border-slate-700/60 text-slate-400 hover:text-accent-rose transition-all" title="Reset All Data">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Container Layout -->
+  <main class="max-w-7xl mx-auto pt-24 pb-16 px-6 space-y-8">
+
+    <!-- Top Metric Bento Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      
+      <!-- Card 1: Total Backlog Time -->
+      <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-accent-violet/10 rounded-full blur-xl group-hover:bg-accent-violet/20 transition-all"></div>
+        <div class="flex items-center justify-between text-slate-400 mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider">Remaining Backlog</span>
+          <i data-lucide="clock" class="w-5 h-5 text-accent-violet"></i>
+        </div>
+        <div id="stat-total-backlog" class="text-3xl font-extrabold tracking-tight text-white font-mono">0h 0m</div>
+        <div class="mt-4 w-full h-1.5 bg-obsidian-950 rounded-full overflow-hidden">
+          <div id="stat-progress-bar-fill" class="h-full bg-gradient-to-r from-accent-violet to-accent-cyan w-0 transition-all duration-500"></div>
+        </div>
+      </div>
+
+      <!-- Card 2: Overall Progress % -->
+      <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-accent-cyan/10 rounded-full blur-xl group-hover:bg-accent-cyan/20 transition-all"></div>
+        <div class="flex items-center justify-between text-slate-400 mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider">Completion Progress</span>
+          <i data-lucide="pie-chart" class="w-5 h-5 text-accent-cyan"></i>
+        </div>
+        <div id="stat-progress-pct" class="text-3xl font-extrabold tracking-tight text-accent-cyan font-mono">0%</div>
+        <p id="stat-completed-lectures-desc" class="text-xs text-slate-400 mt-2">0 / 0 lectures completed</p>
+      </div>
+
+      <!-- Card 3: Completion Estimate Date -->
+      <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-accent-emerald/10 rounded-full blur-xl group-hover:bg-accent-emerald/20 transition-all"></div>
+        <div class="flex items-center justify-between text-slate-400 mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider">Estimated Finish</span>
+          <i data-lucide="calendar" class="w-5 h-5 text-accent-emerald"></i>
+        </div>
+        <div id="stat-estimated-date" class="text-3xl font-extrabold tracking-tight text-accent-emerald">--</div>
+        <p id="stat-target-calc-desc" class="text-xs text-slate-400 mt-2">Based on daily study target</p>
+      </div>
+
+      <!-- Card 4: Daily Hours Target Slider -->
+      <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider">Daily Target</span>
+          <i data-lucide="sliders" class="w-5 h-5 text-accent-amber"></i>
+        </div>
+        <div id="stat-daily-target" class="text-3xl font-extrabold tracking-tight text-white font-mono">3.0 <span class="text-sm font-normal text-slate-400">hrs/day</span></div>
+        <div class="mt-3">
+          <input type="range" id="input-daily-hours" min="0.5" max="12" step="0.5" value="3.0" class="w-full h-1.5 bg-obsidian-950 accent-accent-amber rounded-lg appearance-none cursor-pointer">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Grid: Subjects (Left) + Focus Timer (Center) + Daily Action Plan (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left Column: Customized Curriculum Modules (5 cols) -->
+      <div class="lg:col-span-5 space-y-4">
+        <div class="flex items-center justify-between px-1">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i data-lucide="book-open" class="w-5 h-5 text-accent-violet"></i> Your Active Subjects
+            </h2>
+            <p class="text-xs text-slate-400">Filtered specifically to your study preferences</p>
+          </div>
+          <span id="subject-count-badge" class="px-2.5 py-1 rounded-lg bg-accent-violet/10 text-accent-violet border border-accent-violet/30 text-xs font-bold font-mono">0 Modules</span>
+        </div>
+
+        <!-- Subjects Container -->
+        <div id="main-subjects-list" class="space-y-3.5">
+          <!-- Dynamically populated cards -->
+        </div>
+      </div>
+
+      <!-- Right Column: Focus Pomodoro Widget + Daily Action Plan (7 cols) -->
+      <div class="lg:col-span-7 space-y-8">
+        
+        <!-- Interactive Pomodoro Timer Widget -->
+        <div class="glass-card p-8 rounded-3xl relative overflow-hidden flex flex-col items-center justify-center text-center shadow-glass">
+          
+          <div class="absolute top-6 left-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <i data-lucide="flame" class="w-4 h-4 text-accent-amber"></i> Focus Operating System
+          </div>
+
+          <!-- Circular SVG Timer Ring -->
+          <div class="relative w-64 h-64 md:w-72 md:h-72 my-4 flex items-center justify-center">
+            <svg class="w-full h-full">
+              <circle cx="50%" cy="50%" r="42%" class="stroke-obsidian-800 fill-none" stroke-width="8"></circle>
+              <circle id="timer-progress-ring" cx="50%" cy="50%" r="42%" class="timer-ring-circle fill-none stroke-accent-violet" stroke-width="8" stroke-dasharray="528" stroke-dashoffset="0" stroke-linecap="round"></circle>
+            </svg>
+            <div class="absolute flex flex-col items-center">
+              <span id="timer-display" class="text-5xl md:text-6xl font-extrabold font-mono tracking-tighter text-white">25:00</span>
+              <span id="timer-active-subject-text" class="text-xs font-semibold text-slate-400 mt-2 px-3 py-1 rounded-full bg-obsidian-800/80 border border-slate-700/40">Select Subject to Focus</span>
+            </div>
+          </div>
+
+          <!-- Controls & Subject Selector -->
+          <div class="w-full max-w-md space-y-4">
+            <div class="flex items-center justify-center gap-4">
+              <button id="btn-timer-reset" class="p-3.5 rounded-2xl bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 transition-all border border-slate-700/50">
+                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+              </button>
+              <button id="btn-timer-toggle" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-accent-violet to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-extrabold shadow-glow-violet transition-all active:scale-95 flex items-center gap-3">
+                <i id="play-icon" data-lucide="play" class="w-6 h-6 fill-current"></i> Start Session
+              </button>
+            </div>
+
+            <div class="pt-2">
+              <label for="select-timer-subject" class="text-xs font-semibold text-slate-400 mb-1.5 block text-left">Active Focus Module:</label>
+              <select id="select-timer-subject" class="w-full bg-obsidian-800 border border-slate-700/60 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-200 focus:outline-none focus:border-accent-violet">
+                <option value="">General Focus / No Subject</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Daily Proportional Action Plan -->
+        <div class="glass-card p-6 rounded-3xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i data-lucide="check-square" class="w-5 h-5 text-accent-emerald"></i> Today's Proportional Plan
+              </h3>
+              <p id="schedule-days-count" class="text-xs text-slate-400">Weighted study distribution for today</p>
+            </div>
+            <button onclick="toggleTaskModal(true)" class="px-3 py-1.5 rounded-xl bg-obsidian-800 hover:bg-obsidian-700 border border-slate-700 text-xs font-bold text-slate-200 transition-all flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-4 h-4 text-accent-emerald"></i> Add Task
+            </button>
+          </div>
+
+          <!-- Tasks List -->
+          <div id="schedule-breakdown" class="space-y-2.5">
+            <!-- Dynamically populated tasks -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Add Custom Task Modal -->
+  <div id="task-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-3xl max-w-md w-full p-6 space-y-5 border border-slate-700">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-accent-violet"></i> Add Custom Study Task
+        </h3>
+        <button onclick="toggleTaskModal(false)" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <input type="text" id="input-task-title" placeholder="e.g. Solve Ray Optics DPP #04" class="w-full bg-obsidian-950 border border-slate-700/80 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-accent-violet">
+      <div class="flex justify-end gap-3 pt-2">
+        <button onclick="toggleTaskModal(false)" class="px-4 py-2 rounded-xl bg-obsidian-800 text-xs font-bold text-slate-300">Cancel</button>
+        <button onclick="addCustomTaskAction()" class="px-4 py-2 rounded-xl bg-accent-violet text-white text-xs font-bold shadow-glow-violet">Save Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Core JS Logic -->
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
