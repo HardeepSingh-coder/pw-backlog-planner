@@ -253,28 +253,27 @@ function calculateTargetAndSchedule() {
   const countEl = document.getElementById("schedule-days-count");
   if (countEl) countEl.innerText = scheduleSubtitleText;
 
-  // Generate Daily Action Plan
+  // Generate Daily Action Plan: Target 1 full lecture of each subject for today
   const activeSubjects = state.subjects.filter(sub => sub.backlogSeconds > 0);
-  const totalActiveBacklog = activeSubjects.reduce((sum, sub) => sum + sub.backlogSeconds, 0);
   
   let html = "";
   activeSubjects.forEach((sub) => {
-    const proportion = sub.backlogSeconds / totalActiveBacklog;
-    let allocatedSeconds = Math.round(requiredDailySeconds * proportion);
-    if (allocatedSeconds < 60) allocatedSeconds = 60;
-
+    // 1 full lecture target duration (5400s for Zoology, 6300s for all other subjects)
+    const allocatedSeconds = sub.avgLectureDurationSec || (sub.name === "Zoology by Aarushi Ma'am" ? 5400 : 6300);
     const studiedToday = state.studyToday[sub.name] || 0;
     const remainingSeconds = Math.max(0, allocatedSeconds - studiedToday);
     const isCompleted = remainingSeconds === 0 || state.completedActionsToday[sub.name] === true;
 
     html += `
-      <label class="flex items-center gap-3 cursor-pointer group p-2 rounded-lg hover:bg-white/5 transition-all">
-        <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleActionItem('${sub.name.replace(/'/g, "\\'")}', ${allocatedSeconds})" class="w-5 h-5 rounded border-white/20 bg-transparent text-primary focus:ring-primary/50 cursor-pointer"/>
+      <label class="flex items-center gap-3 cursor-pointer group p-2.5 rounded-xl hover:bg-white/5 transition-all border border-slate-800/40">
+        <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleActionItem('${sub.name.replace(/'/g, "\\'")}', ${allocatedSeconds})" class="w-5 h-5 rounded border-slate-700 bg-obsidian-950 text-accent-violet focus:ring-accent-violet/50 cursor-pointer"/>
         <div class="flex-1">
-          <span class="text-sm ${isCompleted ? 'line-through text-on-surface-variant' : 'group-hover:text-primary'} transition-colors font-medium">${sub.name}</span>
-          <p class="text-[10px] text-on-surface-variant">${isCompleted ? 'Done today' : formatSecondsToHrsMins(allocatedSeconds) + ' target'}</p>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold ${isCompleted ? 'line-through text-slate-500' : 'text-slate-200 group-hover:text-accent-violet'} transition-colors">${sub.name}</span>
+            <span class="text-[11px] font-mono font-bold ${isCompleted ? 'text-accent-emerald' : 'text-accent-cyan'}">${isCompleted ? 'Completed Today' : formatSecondsToHrsMins(remainingSeconds) + ' left'}</span>
+          </div>
+          <p class="text-[10px] text-slate-400 font-mono mt-0.5">${isCompleted ? '1 Lecture Watched' : 'Target: 1 Full Lecture (' + formatSecondsToHrsMins(allocatedSeconds) + ')'}</p>
         </div>
-        <span class="text-xs font-bold text-secondary">${formatSecondsToHrsMins(remainingSeconds)}</span>
       </label>
     `;
   });
