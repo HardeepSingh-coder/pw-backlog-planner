@@ -18,7 +18,8 @@
       "matches": [
         "https://*.pw.live/*",
         "http://localhost:8080/*",
-        "http://127.0.0.1:8080/*"
+        "http://127.0.0.1:8080/*",
+        "https://*.vercel.app/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"

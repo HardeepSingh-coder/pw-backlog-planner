@@ -80,7 +80,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // 3. Notify all planner tabs that sync is complete
     chrome.tabs.query({}, (tabs) => {
       tabs.forEach(tab => {
-        if (tab.url && (tab.url.includes("localhost:8080") || tab.url.includes("127.0.0.1:8080"))) {
+        if (tab.url && (tab.url.includes("localhost:8080") || tab.url.includes("127.0.0.1:8080") || tab.url.includes("vercel.app"))) {
           chrome.tabs.sendMessage(tab.id, { action: "SYNC_COMPLETE" }).catch(() => {});
         }
       });
