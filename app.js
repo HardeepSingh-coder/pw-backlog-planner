@@ -139,6 +139,19 @@ function loadState() {
       console.error("Error loading saved state", e);
     }
   }
+
+  // Automatic Midnight / New Day Reset Logic
+  const todayStr = new Date().toISOString().split('T')[0]; // e.g. "2026-07-23"
+  if (state.lastPlanDate !== todayStr) {
+    console.log("[PW Backlog Planner] New day detected! Resetting Daily Action Plan.");
+    state.studyToday = {};
+    state.completedActionsToday = {};
+    if (state.customTasks && state.customTasks.length > 0) {
+      state.customTasks.forEach(task => task.completed = false);
+    }
+    state.lastPlanDate = todayStr;
+    saveState();
+  }
 }
 
 // Calculate the schedule dates/hours
