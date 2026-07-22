@@ -243,17 +243,21 @@ const currentUrl = window.location.href;
 if (window.location.host.includes("pw.live")) {
   console.log("[PW Auto-Sync] Content script injected on Physics Wallah.");
   
-  // Instant initial scrape after page load
   const runImmediateScrape = () => {
-    if (currentUrl.includes("/study-v2/spd")) {
+    const loc = window.location.href;
+    if (loc.includes("/study-v2/spd") || loc.includes("/spd")) {
       scrapeDashboard();
-    } else if (currentUrl.includes("biology-by-aarushi")) {
+    }
+    if (loc.includes("biology-by-aarushi") || loc.includes("aarushi")) {
       scrapeBiologyChapters();
     }
   };
   
-  setTimeout(runImmediateScrape, 500);
-  setTimeout(runImmediateScrape, 1500);
+  // Run immediately and periodically
+  runImmediateScrape();
+  setTimeout(runImmediateScrape, 300);
+  setTimeout(runImmediateScrape, 1000);
+  setTimeout(runImmediateScrape, 2000);
   
   // Observe DOM changes to capture updates dynamically
   const observer = new MutationObserver(() => {
