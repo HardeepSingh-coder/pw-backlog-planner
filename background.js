@@ -26,18 +26,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chaptersTabId = null;
     }
 
-    // 1. Open dashboard in background tab (active: false prevents stealing focus)
+    // 1. Open dashboard tab
     chrome.tabs.create({ url: "https://www.pw.live/study-v2/spd", active: false }, (tab) => {
       dashboardTabId = tab.id;
       
-      // Auto-close safety limit: 3.5 seconds
+      // Auto-close safety limit: 6.5 seconds (gives PW React SPA time to hydrate)
       dashboardTimeout = setTimeout(() => {
         if (dashboardTabId) {
           console.log("[PW Service Worker] Dashboard tab safety auto-close.");
           chrome.tabs.remove(dashboardTabId).catch(() => {});
           dashboardTabId = null;
         }
-      }, 3500);
+      }, 6500);
     });
   }
   
@@ -60,14 +60,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.tabs.create({ url: subjectUrl, active: false }, (tab) => {
       chaptersTabId = tab.id;
       
-      // Auto-close safety limit: 3.5 seconds
+      // Auto-close safety limit: 6.5 seconds
       chaptersTimeout = setTimeout(() => {
         if (chaptersTabId) {
           console.log("[PW Service Worker] Chapters tab safety auto-close.");
           chrome.tabs.remove(chaptersTabId).catch(() => {});
           chaptersTabId = null;
         }
-      }, 3500);
+      }, 6500);
     });
   }
   
