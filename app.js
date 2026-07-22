@@ -833,14 +833,22 @@ window.addEventListener("message", (event) => {
       state.subjects = filteredData.map(item => {
         const [compLectures, totLectures] = (item.lectures || "0/0").split("/").map(Number);
         const [compDpp, totDpp] = (item.dpp || "0/0").split("/").map(Number);
-        const remaining = Math.max(0, totLectures - compLectures);
+        
+        // Check if user has already watched more lectures locally in state
+        const existingSubject = state.subjects ? state.subjects.find(s => s.name === item.subject) : null;
+        let finalCompLectures = compLectures;
+        if (existingSubject && existingSubject.lecturesCompleted > compLectures) {
+          finalCompLectures = existingSubject.lecturesCompleted;
+        }
+
+        const remaining = Math.max(0, totLectures - finalCompLectures);
         const isZoology = item.subject === "Zoology by Aarushi Ma'am";
         const avgLectureDurationSec = isZoology ? 5400 : 6300;
         const backlogSec = remaining * avgLectureDurationSec;
         
         return {
           name: item.subject,
-          lecturesCompleted: compLectures,
+          lecturesCompleted: finalCompLectures,
           lecturesTotal: totLectures,
           dppCompleted: compDpp,
           dppTotal: totDpp,
