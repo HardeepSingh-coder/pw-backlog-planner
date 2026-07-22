@@ -286,18 +286,23 @@ if (window.location.host.includes("pw.live")) {
     if (event.data && event.data.type === "PW_PLANNER_REQUEST_SYNC") {
       syncDataToPage();
     }
-    // Listen for manual trigger of background scraper from the page UI
+  // Listen for manual trigger of background scraper from the page UI
     if (event.data && event.data.type === "PW_TRIGGER_BACKGROUND_SCRAPE") {
-      chrome.runtime.sendMessage({ action: "START_SCRAPE_FLOW" });
+      chrome.runtime.sendMessage({ action: "START_SCRAPE_FLOW" }, () => {
+        if (chrome.runtime.lastError) {
+          // Ignore background connection errors if service worker is waking up
+        }
+      });
     }
   });
 
   // Listen for message from background worker that sync completes
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "SYNC_COMPLETE") {
+    if (message && message.action === "SYNC_COMPLETE") {
       console.log("[PW Auto-Sync] Background sync finished, updating page.");
       syncDataToPage();
     }
+    return true;
   });
   
   // Trigger initial storage read on page load

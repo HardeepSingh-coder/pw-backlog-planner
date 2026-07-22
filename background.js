@@ -77,13 +77,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chaptersTabId = null;
     }
     
-    // 3. Notify all planner tabs that sync is complete
+    // 3. Notify all planner tabs that sync is complete safely without throwing unchecked lastError
     chrome.tabs.query({}, (tabs) => {
+      if (chrome.runtime.lastError) return;
       tabs.forEach(tab => {
-        if (tab.url && (tab.url.includes("localhost:8080") || tab.url.includes("127.0.0.1:8080") || tab.url.includes("vercel.app"))) {
-          chrome.tabs.sendMessage(tab.id, { action: "SYNC_COMPLETE" }).catch(() => {});
+        if (tab && tab.id && tab.url && (tab.url.includes("localhost:8080") || tab.url.includes("127.0.0.1:8080") || tab.url.includes("vercel.app"))) {
+          chrome.tabs.sendMessage(tab.id, { action: "SYNC_COMPLETE" }, () => {
+            // Silence unchecked runtime.lastError if listener is not active
+            if (chrome.runtime.lastError) {
+              // Ignore
+            }
+          });
         }
       });
     });
   }
+  return true;
 });
