@@ -19,42 +19,51 @@ function parseTimeToSeconds(timeStr) {
 function scrapeDashboard() {
   let results = [];
   
-  // Try table rows first
+  // Try table rows first (support th and td)
   let tableRows = document.querySelectorAll('table tr, tbody tr');
   if (tableRows.length > 0) {
     tableRows.forEach(row => {
-      let cells = Array.from(row.querySelectorAll('td'));
+      let cells = Array.from(row.querySelectorAll('td, th'));
       if (cells.length >= 4) {
-        results.push({
-          subject: cells[0].innerText.trim(),
-          lectures: cells[1].innerText.trim(),
-          dpp: cells[2].innerText.trim(),
-          backlog: cells[3].innerText.trim()
-        });
+        let subj = cells[0].innerText.trim();
+        let lecs = cells[1].innerText.trim();
+        let dpps = cells[2].innerText.trim();
+        let watch = cells[3].innerText.trim();
+        
+        // Ensure it's a valid data row and not a table header row
+        if (subj && lecs.includes('/') && !subj.toLowerCase().includes("subject")) {
+          results.push({
+            subject: subj,
+            lectures: lecs,
+            dpp: dpps,
+            backlog: watch
+          });
+        }
       }
     });
   }
   
-  // Fallback to div-based rows
+  // Fallback to div-based rows if table didn't produce results
   if (results.length === 0) {
-    const divs = Array.from(document.querySelectorAll('div, tr')).filter(el => {
+    const rows = Array.from(document.querySelectorAll('div, tr')).filter(el => {
       const text = el.innerText || "";
-      const matchesLectures = /\d+\/\d+/.test(text);
-      const matchesTime = /(\d+h|\d+m|\d+s|0s)/.test(text);
-      return matchesLectures && matchesTime && el.children.length >= 3 && el.children.length <= 8;
+      return /\d+\/\d+/.test(text) && (text.includes("Ma'am") || text.includes("Sir") || text.includes("English") || text.includes("Notices"));
     });
     
-    const leafDivs = divs.filter(d => !divs.some(other => other !== d && d.contains(other)));
-    
-    leafDivs.forEach(row => {
-      let items = Array.from(row.children).map(c => c.innerText.trim());
-      if (items.length >= 4) {
-        results.push({
-          subject: items[0],
-          lectures: items[1],
-          dpp: items[2],
-          backlog: items[3]
-        });
+    rows.forEach(row => {
+      const text = row.innerText || "";
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length >= 2) {
+        const subj = lines[0];
+        const lecMatch = text.match(/(\d+\/\d+)/);
+        if (lecMatch && !results.some(r => r.subject === subj)) {
+          results.push({
+            subject: subj,
+            lectures: lecMatch[1],
+            dpp: "0/0",
+            backlog: "0s"
+          });
+        }
       }
     });
   }
