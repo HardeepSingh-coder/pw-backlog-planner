@@ -10,6 +10,7 @@ let chaptersTimeout = null;
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "START_SCRAPE_FLOW") {
     console.log("[PW Service Worker] Starting background scrape flow...");
+    if (typeof sendResponse === "function") sendResponse({ status: "started" });
     
     // Clear any previous timeouts
     if (dashboardTimeout) clearTimeout(dashboardTimeout);
@@ -42,6 +43,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   if (message.action === "DASHBOARD_SCRAPED") {
     console.log("[PW Service Worker] Dashboard scraped. Closing dashboard tab.");
+    if (typeof sendResponse === "function") sendResponse({ status: "dashboard_received" });
     if (dashboardTimeout) clearTimeout(dashboardTimeout);
     if (dashboardTabId) {
       chrome.tabs.remove(dashboardTabId).catch(() => {});
@@ -71,6 +73,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   if (message.action === "CHAPTERS_SCRAPED") {
     console.log("[PW Service Worker] Chapters scraped. Closing chapters tab.");
+    if (typeof sendResponse === "function") sendResponse({ status: "chapters_received" });
     if (chaptersTimeout) clearTimeout(chaptersTimeout);
     if (chaptersTabId) {
       chrome.tabs.remove(chaptersTabId).catch(() => {});
