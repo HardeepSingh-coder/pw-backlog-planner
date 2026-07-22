@@ -26,8 +26,8 @@
     }
   ],
   "icons": {
-    "16": "icon.svg",
-    "48": "icon.svg",
-    "128": "icon.svg"
+    "16": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
   }
 }
