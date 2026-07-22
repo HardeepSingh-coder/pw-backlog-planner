@@ -760,18 +760,18 @@ function initApp() {
       syncBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4 text-accent-violet animate-spin"></i> Syncing...`;
       if (window.lucide) lucide.createIcons();
 
-      // Trigger background scrape
+      // Trigger background scrape via Extension Content Script
       window.postMessage({ type: "PW_TRIGGER_BACKGROUND_SCRAPE" }, "*");
+      window.postMessage({ type: "PW_PLANNER_REQUEST_SYNC" }, "*");
 
-      // Safety timeout: If extension takes longer than 6s, restore button text
+      // Safety timeout: restore button icon after 4 seconds
       setTimeout(() => {
         const btn = document.getElementById("btn-trigger-sync");
-        if (btn && btn.innerText.includes("Syncing")) {
+        if (btn) {
           btn.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4 text-accent-violet"></i> Sync Now`;
           if (window.lucide) lucide.createIcons();
-          requestExtensionSync();
         }
-      }, 6000);
+      }, 4000);
     });
   }
 
