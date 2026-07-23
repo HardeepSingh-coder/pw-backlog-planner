@@ -140,6 +140,34 @@ function loadState() {
     }
   }
 
+  // If subjects are empty or uninitialized, load default subjects
+  if (!state.subjects || state.subjects.length === 0) {
+    window.loadDemoDataAction();
+  } else {
+    // Upgrade existing subjects with latest curriculum total/watched lecture counts if newer
+    const sampleNormalized = filterAndNormalizeSubjects(SAMPLE_DATA);
+    sampleNormalized.forEach(sampleItem => {
+      const lecMatch = (sampleItem.lectures || "").match(/(\d+)\s*\/\s*(\d+)/);
+      if (lecMatch) {
+        const sampleComp = parseInt(lecMatch[1]);
+        const sampleTot = parseInt(lecMatch[2]);
+        const existing = state.subjects.find(s => s.name === sampleItem.subject);
+        if (existing) {
+          if (sampleTot > existing.lecturesTotal) {
+            existing.lecturesTotal = sampleTot;
+          }
+          if (sampleComp > existing.lecturesCompleted) {
+            existing.lecturesCompleted = sampleComp;
+          }
+          const remaining = Math.max(0, existing.lecturesTotal - existing.lecturesCompleted);
+          existing.backlogSeconds = remaining * existing.avgLectureDurationSec;
+          existing.originalBacklogSeconds = existing.backlogSeconds;
+        }
+      }
+    });
+    saveState();
+  }
+
   // Automatic Midnight / New Day Reset Logic
   const todayStr = new Date().toISOString().split('T')[0]; // e.g. "2026-07-23"
   if (state.lastPlanDate !== todayStr) {
