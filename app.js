@@ -194,10 +194,15 @@ function loadState() {
     saveState();
   }
 
-  // Automatic Midnight / New Day Reset Logic
-  const todayStr = new Date().toISOString().split('T')[0]; // e.g. "2026-07-23"
+  // Automatic Midnight / New Day Reset Logic (Local Timezone!)
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`; // Local YYYY-MM-DD format (e.g. "2026-07-24")
+
   if (state.lastPlanDate !== todayStr) {
-    console.log("[PW Backlog Planner] New day detected! Resetting Daily Action Plan.");
+    console.log("[PW Backlog Planner] New day detected! Resetting Daily Action Plan for local date:", todayStr);
     state.studyToday = {};
     state.completedActionsToday = {};
     if (state.customTasks && state.customTasks.length > 0) {
