@@ -97,24 +97,24 @@ function formatSecondsToHrsMins(seconds) {
 // Filter and normalize subjects based on user curriculum selection
 function filterAndNormalizeSubjects(rawData) {
   return rawData.map(item => {
-    let subjectName = item.subject || "";
+    let subjectName = (item.subject || "").toLowerCase();
     
-    if (subjectName.toLowerCase().includes("samridhi") && subjectName.toLowerCase().includes("botany")) {
+    if (subjectName.includes("botany") || subjectName.includes("samridhi")) {
       return { ...item, subject: "Botany by Samridhi Ma'am" };
     }
-    if (subjectName.toLowerCase().includes("rakshak") && subjectName.toLowerCase().includes("physics")) {
+    if ((subjectName.includes("physics") || subjectName.includes("rakshak")) && !subjectName.includes("akshay")) {
       return { ...item, subject: "Physics by Rakshak Sir" };
     }
-    if (subjectName.toLowerCase().includes("sunil") && subjectName.toLowerCase().includes("chemistry")) {
+    if ((subjectName.includes("chemistry") || subjectName.includes("sunil")) && !subjectName.includes("aakash")) {
       return { ...item, subject: "Physical Chemistry by Sunil Sir" };
     }
-    if (subjectName.trim().toLowerCase() === "english") {
+    if (subjectName.includes("english")) {
       return { ...item, subject: "English" };
     }
-    if (subjectName.toLowerCase().includes("ritik") && subjectName.toLowerCase().includes("mathematics")) {
+    if (subjectName.includes("mathematics") || subjectName.includes("math") || subjectName.includes("ritik")) {
       return { ...item, subject: "Mathematics by Ritik Sir" };
     }
-    if (subjectName.toLowerCase().includes("aarushi") && (subjectName.toLowerCase().includes("biology") || subjectName.toLowerCase().includes("zoology"))) {
+    if (subjectName.includes("aarushi") || subjectName.includes("biology") || subjectName.includes("zoology")) {
       return { ...item, subject: "Zoology by Aarushi Ma'am" };
     }
     return null;
@@ -867,17 +867,17 @@ window.addEventListener("message", (event) => {
       }
       
       state.subjects = filteredData.map(item => {
-        const [compLectures, totLectures] = (item.lectures || "0/0").split("/").map(Number);
-        const [compDpp, totDpp] = (item.dpp || "0/0").split("/").map(Number);
+        const lecMatch = (item.lectures || "").match(/(\d+)\s*\/\s*(\d+)/);
+        const compLectures = lecMatch ? parseInt(lecMatch[1]) : 0;
+        const totLectures = lecMatch ? parseInt(lecMatch[2]) : 0;
+
+        const dppMatch = (item.dpp || "").match(/(\d+)\s*\/\s*(\d+)/);
+        const compDpp = dppMatch ? parseInt(dppMatch[1]) : 0;
+        const totDpp = dppMatch ? parseInt(dppMatch[2]) : 0;
         
         // Check if user has already watched more lectures locally in state
         const existingSubject = state.subjects ? state.subjects.find(s => s.name === item.subject) : null;
-        let finalCompLectures = compLectures;
-        if (existingSubject && existingSubject.lecturesCompleted > compLectures) {
-          finalCompLectures = existingSubject.lecturesCompleted;
-        }
-
-        // Always update total lectures to the latest scraped total from PW
+        let finalCompLectures = Math.max(compLectures, existingSubject ? existingSubject.lecturesCompleted : 0);
         let finalTotalLectures = totLectures > 0 ? totLectures : (existingSubject ? existingSubject.lecturesTotal : 0);
 
         const remaining = Math.max(0, finalTotalLectures - finalCompLectures);

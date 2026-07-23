@@ -23,20 +23,25 @@ function scrapeDashboard() {
   let tableRows = document.querySelectorAll('table tr, tbody tr');
   if (tableRows.length > 0) {
     tableRows.forEach(row => {
-      let cells = Array.from(row.querySelectorAll('td, th'));
-      if (cells.length >= 4) {
-        let subj = cells[0].innerText.trim();
-        let lecs = cells[1].innerText.trim();
-        let dpps = cells[2].innerText.trim();
-        let watch = cells[3].innerText.trim();
+      let cells = Array.from(row.querySelectorAll('td, th')).map(c => c.innerText.trim());
+      if (cells.length >= 2) {
+        let subj = cells[0];
+        let lecMatch = null;
+        for (let i = 1; i < cells.length; i++) {
+          let m = cells[i].match(/(\d+\s*\/\s*\d+)/);
+          if (m) {
+            lecMatch = m[1];
+            break;
+          }
+        }
+        let watchTime = cells[cells.length - 1] || "0s";
         
-        // Ensure it's a valid data row and not a table header row
-        if (subj && lecs.includes('/') && !subj.toLowerCase().includes("subject")) {
+        if (subj && lecMatch && !subj.toLowerCase().includes("subject")) {
           results.push({
             subject: subj,
-            lectures: lecs,
-            dpp: dpps,
-            backlog: watch
+            lectures: lecMatch,
+            dpp: "0/0",
+            backlog: watchTime
           });
         }
       }
