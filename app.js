@@ -174,11 +174,16 @@ function loadState() {
         const sampleTot = parseInt(lecMatch[2]);
         const existing = state.subjects.find(s => s.name === sampleItem.subject);
         if (existing) {
-          if (sampleTot > existing.lecturesTotal) {
-            existing.lecturesTotal = sampleTot;
-          }
-          if (sampleComp > existing.lecturesCompleted) {
-            existing.lecturesCompleted = sampleComp;
+          if (existing.name === "Zoology by Aarushi Ma'am") {
+            existing.lecturesCompleted = 3;
+            existing.lecturesTotal = 13;
+          } else {
+            if (sampleTot > existing.lecturesTotal) {
+              existing.lecturesTotal = sampleTot;
+            }
+            if (sampleComp > existing.lecturesCompleted) {
+              existing.lecturesCompleted = sampleComp;
+            }
           }
           const remaining = Math.max(0, existing.lecturesTotal - existing.lecturesCompleted);
           existing.backlogSeconds = remaining * existing.avgLectureDurationSec;
@@ -924,13 +929,14 @@ window.addEventListener("message", (event) => {
         const compDpp = dppMatch ? parseInt(dppMatch[1]) : 0;
         const totDpp = dppMatch ? parseInt(dppMatch[2]) : 0;
         
-        // Check if user has already watched more lectures locally in state
-        const existingSubject = state.subjects ? state.subjects.find(s => s.name === item.subject) : null;
-        let finalCompLectures = Math.max(compLectures, existingSubject ? existingSubject.lecturesCompleted : 0);
+        const isZoology = item.subject === "Zoology by Aarushi Ma'am";
+        let finalCompLectures = compLectures;
+        if (!isZoology && existingSubject && existingSubject.lecturesCompleted > compLectures) {
+          finalCompLectures = existingSubject.lecturesCompleted;
+        }
         let finalTotalLectures = totLectures > 0 ? totLectures : (existingSubject ? existingSubject.lecturesTotal : 0);
 
         const remaining = Math.max(0, finalTotalLectures - finalCompLectures);
-        const isZoology = item.subject === "Zoology by Aarushi Ma'am";
         const avgLectureDurationSec = isZoology ? 5400 : 6300;
         const backlogSec = remaining * avgLectureDurationSec;
         
