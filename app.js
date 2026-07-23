@@ -96,29 +96,40 @@ function formatSecondsToHrsMins(seconds) {
 
 // Filter and normalize subjects based on user curriculum selection
 function filterAndNormalizeSubjects(rawData) {
-  return rawData.map(item => {
+  const mapped = rawData.map(item => {
     let subjectName = (item.subject || "").toLowerCase();
     
-    if (subjectName.includes("botany") || subjectName.includes("samridhi")) {
+    if (subjectName.includes("samridhi") || (subjectName.includes("botany") && !subjectName.includes("aarushi") && !subjectName.includes("supriya"))) {
       return { ...item, subject: "Botany by Samridhi Ma'am" };
     }
-    if ((subjectName.includes("physics") || subjectName.includes("rakshak")) && !subjectName.includes("akshay")) {
+    if (subjectName.includes("rakshak") || (subjectName.includes("physics") && !subjectName.includes("akshay"))) {
       return { ...item, subject: "Physics by Rakshak Sir" };
     }
-    if ((subjectName.includes("chemistry") || subjectName.includes("sunil")) && !subjectName.includes("aakash")) {
+    if (subjectName.includes("sunil") || (subjectName.includes("chemistry") && !subjectName.includes("aakash"))) {
       return { ...item, subject: "Physical Chemistry by Sunil Sir" };
     }
     if (subjectName.includes("english")) {
       return { ...item, subject: "English" };
     }
-    if (subjectName.includes("mathematics") || subjectName.includes("math") || subjectName.includes("ritik")) {
+    if (subjectName.includes("ritik") || (subjectName.includes("mathematics") && !subjectName.includes("deepak"))) {
       return { ...item, subject: "Mathematics by Ritik Sir" };
     }
-    if (subjectName.includes("aarushi") || subjectName.includes("biology") || subjectName.includes("zoology")) {
+    if (subjectName.includes("aarushi") || (subjectName.includes("biology") && !subjectName.includes("supriya"))) {
       return { ...item, subject: "Zoology by Aarushi Ma'am" };
     }
     return null;
   }).filter(item => item !== null);
+
+  // Deduplicate by subject name to guarantee exactly 1 card per selected curriculum module
+  const uniqueSubjects = [];
+  const seenNames = new Set();
+  mapped.forEach(item => {
+    if (!seenNames.has(item.subject)) {
+      seenNames.add(item.subject);
+      uniqueSubjects.push(item);
+    }
+  });
+  return uniqueSubjects;
 }
 
 // LocalStorage persistence
@@ -138,6 +149,16 @@ function loadState() {
     } catch (e) {
       console.error("Error loading saved state", e);
     }
+  }
+
+  // Deduplicate any duplicates in state.subjects loaded from previous runs
+  if (state.subjects && state.subjects.length > 0) {
+    const seenNames = new Set();
+    state.subjects = state.subjects.filter(sub => {
+      if (seenNames.has(sub.name)) return false;
+      seenNames.add(sub.name);
+      return true;
+    });
   }
 
   // If subjects are empty or uninitialized, load default subjects
