@@ -1,11 +1,11 @@
-// Sample demo data matching the user's screenshot
+// Sample demo data matching the user's latest screenshot
 const SAMPLE_DATA = [
-  { subject: "Physics by Rakshak Sir", lectures: "14/37", dpp: "2/5", backlog: "31h 29m 24s" },
-  { subject: "Biology by Aarushi Ma'am", lectures: "3/13", dpp: "2/11", backlog: "10h 35m 51s" },
+  { subject: "Physics by Rakshak Sir", lectures: "15/38", dpp: "2/5", backlog: "33h 15m 41s" },
+  { subject: "Biology by Aarushi Ma'am", lectures: "6/31", dpp: "1/5", backlog: "10h 35m 51s" },
   { subject: "Physical Chemistry by Sunil Sir", lectures: "5/24", dpp: "1/4", backlog: "07h 14m 06s" },
-  { subject: "Mathematics by Ritik Sir", lectures: "3/26", dpp: "0/4", backlog: "04h 16m 51s" },
-  { subject: "Botany by Samridhi Ma'am", lectures: "3/15", dpp: "0/3", backlog: "03h 16m 23s" },
-  { subject: "English", lectures: "0/18", dpp: "0/10", backlog: "58m 18s" }
+  { subject: "Mathematics by Ritik Sir", lectures: "3/27", dpp: "0/4", backlog: "04h 16m 51s" },
+  { subject: "Botany by Samridhi Ma'am", lectures: "4/16", dpp: "0/3", backlog: "04h 13m 27s" },
+  { subject: "English", lectures: "1/18", dpp: "0/10", backlog: "02h 03m 02s" }
 ];
 
 // Sample demo chapter data for Aarushi Ma'am (showing Botany / Zoology split)
@@ -521,11 +521,21 @@ function renderDashboard() {
         </div>
 
         <div class="flex justify-between items-center pt-2 border-t border-slate-800/60" onclick="event.stopPropagation()">
-          <span class="text-[11px] text-slate-400 font-medium">Quick Adjust:</span>
-          <div class="flex items-center gap-1.5 bg-obsidian-950 p-1 rounded-lg border border-slate-800">
-            <button onclick="adjustLectures(${idx}, -1)" class="w-5 h-5 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-xs font-bold transition-all">-</button>
-            <span class="font-mono font-bold text-xs text-white px-2">${compLectures}</span>
-            <button onclick="adjustLectures(${idx}, 1)" class="w-5 h-5 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-xs font-bold transition-all">+</button>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-slate-400 font-medium">Watched:</span>
+            <div class="flex items-center gap-1 bg-obsidian-950 p-1 rounded-lg border border-slate-800">
+              <button onclick="adjustLectures(${idx}, -1)" class="w-4 h-4 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-[10px] font-bold transition-all">-</button>
+              <span class="font-mono font-bold text-xs text-white px-1">${compLectures}</span>
+              <button onclick="adjustLectures(${idx}, 1)" class="w-4 h-4 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-[10px] font-bold transition-all">+</button>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-slate-400 font-medium">Total:</span>
+            <div class="flex items-center gap-1 bg-obsidian-950 p-1 rounded-lg border border-slate-800">
+              <button onclick="adjustTotalLectures(${idx}, -1)" class="w-4 h-4 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-[10px] font-bold transition-all">-</button>
+              <span class="font-mono font-bold text-xs text-accent-cyan px-1">${totalLectures}</span>
+              <button onclick="adjustTotalLectures(${idx}, 1)" class="w-4 h-4 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-[10px] font-bold transition-all">+</button>
+            </div>
           </div>
         </div>
       </div>
@@ -589,6 +599,19 @@ window.adjustLectures = function(idx, delta) {
     saveState();
     renderDashboard();
   }
+};
+
+// Adjust Total Lectures manually
+window.adjustTotalLectures = function(idx, delta) {
+  const subject = state.subjects[idx];
+  if (!subject) return;
+  
+  subject.lecturesTotal = Math.max(subject.lecturesCompleted, subject.lecturesTotal + delta);
+  const remaining = Math.max(0, subject.lecturesTotal - subject.lecturesCompleted);
+  subject.backlogSeconds = remaining * subject.avgLectureDurationSec;
+  subject.originalBacklogSeconds = subject.backlogSeconds;
+  saveState();
+  renderDashboard();
 };
 
 // Set Pomodoro focus subject directly from subject card click
@@ -854,7 +877,10 @@ window.addEventListener("message", (event) => {
           finalCompLectures = existingSubject.lecturesCompleted;
         }
 
-        const remaining = Math.max(0, totLectures - finalCompLectures);
+        // Always update total lectures to the latest scraped total from PW
+        let finalTotalLectures = totLectures > 0 ? totLectures : (existingSubject ? existingSubject.lecturesTotal : 0);
+
+        const remaining = Math.max(0, finalTotalLectures - finalCompLectures);
         const isZoology = item.subject === "Zoology by Aarushi Ma'am";
         const avgLectureDurationSec = isZoology ? 5400 : 6300;
         const backlogSec = remaining * avgLectureDurationSec;
@@ -862,7 +888,7 @@ window.addEventListener("message", (event) => {
         return {
           name: item.subject,
           lecturesCompleted: finalCompLectures,
-          lecturesTotal: totLectures,
+          lecturesTotal: finalTotalLectures,
           dppCompleted: compDpp,
           dppTotal: totDpp,
           backlogSeconds: backlogSec,
