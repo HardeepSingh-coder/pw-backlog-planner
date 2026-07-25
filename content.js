@@ -15,8 +15,16 @@ function parseTimeToSeconds(timeStr) {
   return seconds;
 }
 
+let hasSentDashboardMsg = false;
+let hasSentChaptersMsg = false;
+let lastDashboardScrapeTime = 0;
+let lastChaptersScrapeTime = 0;
+
 // Scrape Main Backlog Dashboard
 function scrapeDashboard() {
+  const now = Date.now();
+  if (now - lastDashboardScrapeTime < 5000) return;
+
   let results = [];
   
   // Try table rows first (support th and td)
@@ -77,6 +85,8 @@ function scrapeDashboard() {
   results = results.filter(r => r.subject && r.backlog && r.lectures.includes('/'));
   
   if (results.length > 0) {
+    lastDashboardScrapeTime = now;
+
     // Dynamically search for Aarushi Ma'am's subject page URL to scrape chapters next
     let subjectUrl = null;
     const links = Array.from(document.querySelectorAll('a'));
@@ -108,17 +118,25 @@ function scrapeDashboard() {
       showSyncIndicator(`Scraped ${results.length} subjects.`);
       console.log("[PW Auto-Sync] Saved backlog list:", results);
       
-      // Send signal to background worker that dashboard is ready, forwarding subject URL
-      chrome.runtime.sendMessage({ 
-        action: "DASHBOARD_SCRAPED", 
-        subjectUrl: subjectUrl 
-      });
+      if (!hasSentDashboardMsg) {
+        hasSentDashboardMsg = true;
+        // Send signal to background worker that dashboard is ready, forwarding subject URL
+        chrome.runtime.sendMessage({ 
+          action: "DASHBOARD_SCRAPED", 
+          subjectUrl: subjectUrl 
+        }, () => {
+          if (chrome.runtime.lastError) {}
+        });
+      }
     });
   }
 }
 
 // Scrape Biology chapters page to extract Zoology
 function scrapeBiologyChapters() {
+  const now = Date.now();
+  if (now - lastChaptersScrapeTime < 5000) return;
+
   let parsedChapters = [];
   
   // Method 1: Target leaf elements containing CH - and Lecture:
@@ -179,6 +197,8 @@ function scrapeBiologyChapters() {
   }
 
   if (parsedChapters.length > 0) {
+    lastChaptersScrapeTime = now;
+
     // Save scraped chapters to storage
     chrome.storage.local.set({ 
       pw_aarushi_chapters: parsedChapters,
@@ -188,8 +208,13 @@ function scrapeBiologyChapters() {
       showSyncIndicator(`Scraped Aarushi Ma'am chapters (${zoologyCount} Zoology).`);
       console.log("[PW Auto-Sync] Saved Aarushi Ma'am chapters:", parsedChapters);
       
-      // Notify background worker that chapters scrape is complete
-      chrome.runtime.sendMessage({ action: "CHAPTERS_SCRAPED" });
+      if (!hasSentChaptersMsg) {
+        hasSentChaptersMsg = true;
+        // Notify background worker that chapters scrape is complete
+        chrome.runtime.sendMessage({ action: "CHAPTERS_SCRAPED" }, () => {
+          if (chrome.runtime.lastError) {}
+        });
+      }
     });
   }
 }
