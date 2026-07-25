@@ -4,7 +4,7 @@ const SAMPLE_DATA = [
   { subject: "Biology by Aarushi Ma'am", lectures: "6/31", dpp: "1/5", backlog: "10h 35m 51s" },
   { subject: "Physical Chemistry by Sunil Sir", lectures: "6/27", dpp: "1/4", backlog: "08h 29m 36s" },
   { subject: "Mathematics by Ritik Sir", lectures: "4/27", dpp: "0/4", backlog: "05h 41m 43s" },
-  { subject: "Botany by Samridhi Ma'am", lectures: "4/16", dpp: "0/3", backlog: "06h 52m 24s" },
+  { subject: "Botany by Samridhi Ma'am", lectures: "6/16", dpp: "0/3", backlog: "06h 52m 24s" },
   { subject: "English", lectures: "2/19", dpp: "1/10", backlog: "03h 02m 11s" }
 ];
 
