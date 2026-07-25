@@ -1,11 +1,11 @@
 // Sample demo data matching the user's latest screenshot
 const SAMPLE_DATA = [
-  { subject: "Physics by Rakshak Sir", lectures: "15/38", dpp: "2/5", backlog: "33h 15m 41s" },
+  { subject: "Physics by Rakshak Sir", lectures: "16/39", dpp: "2/5", backlog: "34h 52m 10s" },
   { subject: "Biology by Aarushi Ma'am", lectures: "6/31", dpp: "1/5", backlog: "10h 35m 51s" },
-  { subject: "Physical Chemistry by Sunil Sir", lectures: "5/24", dpp: "1/4", backlog: "07h 14m 06s" },
-  { subject: "Mathematics by Ritik Sir", lectures: "3/27", dpp: "0/4", backlog: "04h 16m 51s" },
-  { subject: "Botany by Samridhi Ma'am", lectures: "4/16", dpp: "0/3", backlog: "04h 13m 27s" },
-  { subject: "English", lectures: "1/18", dpp: "0/10", backlog: "02h 03m 02s" }
+  { subject: "Physical Chemistry by Sunil Sir", lectures: "6/27", dpp: "1/4", backlog: "08h 29m 36s" },
+  { subject: "Mathematics by Ritik Sir", lectures: "4/27", dpp: "0/4", backlog: "05h 41m 43s" },
+  { subject: "Botany by Samridhi Ma'am", lectures: "4/16", dpp: "0/3", backlog: "06h 52m 24s" },
+  { subject: "English", lectures: "2/19", dpp: "1/10", backlog: "03h 02m 11s" }
 ];
 
 // Sample demo chapter data for Aarushi Ma'am (showing Botany / Zoology split)
