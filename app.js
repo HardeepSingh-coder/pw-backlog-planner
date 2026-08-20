@@ -859,10 +859,9 @@ function initApp() {
   const resetAllBtn = document.getElementById("btn-reset-all");
   if (resetAllBtn) {
     resetAllBtn.addEventListener("click", () => {
-      if (confirm("Reset all planner data?")) {
+      if (confirm("Reset all planner data to latest verified curriculum counts?")) {
         localStorage.removeItem("pw_backlog_state");
-        state = { subjects: [], preferences: { dailyHoursTarget: 3.0, targetDate: "", excludeDays: [0] }, studyToday: {}, completedActionsToday: {} };
-        renderDashboard();
+        window.loadDemoDataAction();
       }
     });
   }
