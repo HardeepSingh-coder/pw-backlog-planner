@@ -12,7 +12,7 @@ const SAMPLE_DATA = [
 const SAMPLE_CHAPTERS = [
   { chNum: "CH - 01", title: "Cell: The Unit Of Life (Botany)", lectures: "3/9", dpp: "0/8" },
   { chNum: "CH - 02", title: "The Living World (Zoology)", lectures: "3/3", dpp: "2/2" },
-  { chNum: "CH - 03", title: "Animal Kingdom (Zoology)", lectures: "0/10", dpp: "0/9" },
+  { chNum: "CH - 03", title: "Animal Kingdom (Zoology)", lectures: "3/10", dpp: "2/9" },
   { chNum: "CH - 04", title: "Biological Classification...", lectures: "0/5", dpp: "0/4" }
 ];
 
@@ -174,16 +174,11 @@ function loadState() {
         const sampleTot = parseInt(lecMatch[2]);
         const existing = state.subjects.find(s => s.name === sampleItem.subject);
         if (existing) {
-          if (existing.name === "Zoology by Aarushi Ma'am") {
-            existing.lecturesCompleted = 3;
-            existing.lecturesTotal = 13;
-          } else {
-            if (sampleTot > existing.lecturesTotal) {
-              existing.lecturesTotal = sampleTot;
-            }
-            if (sampleComp > existing.lecturesCompleted) {
-              existing.lecturesCompleted = sampleComp;
-            }
+          if (sampleTot > existing.lecturesTotal) {
+            existing.lecturesTotal = sampleTot;
+          }
+          if (sampleComp > existing.lecturesCompleted) {
+            existing.lecturesCompleted = sampleComp;
           }
           const remaining = Math.max(0, existing.lecturesTotal - existing.lecturesCompleted);
           existing.backlogSeconds = remaining * existing.avgLectureDurationSec;
@@ -936,7 +931,7 @@ window.addEventListener("message", (event) => {
         
         const isZoology = item.subject === "Zoology by Aarushi Ma'am";
         let finalCompLectures = compLectures;
-        if (!isZoology && existingSubject && existingSubject.lecturesCompleted > compLectures) {
+        if (existingSubject && existingSubject.lecturesCompleted > compLectures) {
           finalCompLectures = existingSubject.lecturesCompleted;
         }
         let finalTotalLectures = totLectures > 0 ? totLectures : (existingSubject ? existingSubject.lecturesTotal : 0);
