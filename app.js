@@ -898,7 +898,8 @@ window.addEventListener("message", (event) => {
       const biologyEntryIndex = filteredData.findIndex(sub => sub.subject === "Zoology by Aarushi Ma'am");
       if (biologyEntryIndex !== -1) {
         const biologyEntry = filteredData[biologyEntryIndex];
-        let compLectures = 6;
+        const existingZoology = state.subjects ? state.subjects.find(s => s.name === "Zoology by Aarushi Ma'am") : null;
+        let compLectures = existingZoology ? Math.max(6, existingZoology.lecturesCompleted) : 6;
         let totLectures = 13;
         let compDpp = 2;
         let totDpp = 11;
@@ -906,15 +907,16 @@ window.addEventListener("message", (event) => {
         if (chapters && chapters.length > 0) {
           const zoologyChapters = chapters.filter(ch => ch.title.toLowerCase().includes("(zoology)"));
           if (zoologyChapters.length > 0) {
-            compLectures = 0; totLectures = 0; compDpp = 0; totDpp = 0;
+            let scrapedComp = 0; totLectures = 0; compDpp = 0; totDpp = 0;
             zoologyChapters.forEach(ch => {
               const [cl, tl] = (ch.lectures || "0/0").split("/").map(Number);
               const [cd, td] = (ch.dpp || "0/0").split("/").map(Number);
-              compLectures += cl || 0;
+              scrapedComp += cl || 0;
               totLectures += tl || 0;
               compDpp += cd || 0;
               totDpp += td || 0;
             });
+            compLectures = Math.max(compLectures, scrapedComp);
           }
         }
         
