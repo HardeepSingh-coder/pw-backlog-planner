@@ -957,6 +957,7 @@ window.addEventListener("message", (event) => {
         biologyEntry.backlog = formatSecondsToReadable(zoologyBacklogSec);
       }
       
+      const currentSubjects = state.subjects;
       state.subjects = filteredData.map(item => {
         const lecMatch = (item.lectures || "").match(/(\d+)\s*\/\s*(\d+)/);
         const compLectures = lecMatch ? parseInt(lecMatch[1]) : 0;
@@ -967,6 +968,7 @@ window.addEventListener("message", (event) => {
         const totDpp = dppMatch ? parseInt(dppMatch[2]) : 0;
         
         const isZoology = item.subject === "Zoology by Aarushi Ma'am";
+        const existingSubject = currentSubjects ? currentSubjects.find(s => s.name === item.subject) : null;
         let finalCompLectures = compLectures;
         if (existingSubject && existingSubject.lecturesCompleted > compLectures) {
           finalCompLectures = existingSubject.lecturesCompleted;
