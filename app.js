@@ -485,15 +485,9 @@ window.toggleActionItem = function(subName, allocatedSeconds) {
 };
 
 function updateLecturesCompletedFromBacklog(subject) {
-  const totalDuration = subject.originalBacklogSeconds;
-  const remainingDuration = subject.backlogSeconds;
-  const durationCompleted = totalDuration - remainingDuration;
-  
-  if (subject.avgLectureDurationSec > 0) {
-    const lecturesDelta = Math.floor(durationCompleted / subject.avgLectureDurationSec);
-    const initialLecturesCompleted = Math.max(0, subject.lecturesTotal - Math.ceil(totalDuration / subject.avgLectureDurationSec));
-    
-    subject.lecturesCompleted = Math.min(subject.lecturesTotal, initialLecturesCompleted + lecturesDelta);
+  if (subject.avgLectureDurationSec > 0 && subject.lecturesTotal > 0) {
+    const remainingLectures = Math.ceil(subject.backlogSeconds / subject.avgLectureDurationSec);
+    subject.lecturesCompleted = Math.max(0, Math.min(subject.lecturesTotal, subject.lecturesTotal - remainingLectures));
   }
 }
 
@@ -650,30 +644,24 @@ window.adjustLectures = function(idx, delta) {
   const subject = state.subjects[idx];
   if (!subject) return;
   
-  const originalComp = subject.lecturesCompleted;
   subject.lecturesCompleted = Math.max(0, Math.min(subject.lecturesTotal, subject.lecturesCompleted + delta));
-  const actualDelta = subject.lecturesCompleted - originalComp;
-  
-  if (actualDelta !== 0) {
-    const timeChange = actualDelta * subject.avgLectureDurationSec;
-    subject.backlogSeconds = Math.max(0, subject.backlogSeconds - timeChange);
-    saveState();
-    renderDashboard();
-  }
+  const remainingLectures = Math.max(0, subject.lecturesTotal - subject.lecturesCompleted);
+  subject.backlogSeconds = remainingLectures * subject.avgLectureDurationSec;
+  subject.originalBacklogSeconds = subject.backlogSeconds;
+  saveState();
+  renderDashboard();
 };
 
 window.updateSubjectLecturesDirectly = function(idx, val) {
   const subject = state.subjects[idx];
   if (!subject) return;
   const newComp = Math.max(0, Math.min(subject.lecturesTotal, parseInt(val) || 0));
-  const actualDelta = newComp - subject.lecturesCompleted;
-  if (actualDelta !== 0) {
-    subject.lecturesCompleted = newComp;
-    const timeChange = actualDelta * subject.avgLectureDurationSec;
-    subject.backlogSeconds = Math.max(0, subject.backlogSeconds - timeChange);
-    saveState();
-    renderDashboard();
-  }
+  subject.lecturesCompleted = newComp;
+  const remainingLectures = Math.max(0, subject.lecturesTotal - subject.lecturesCompleted);
+  subject.backlogSeconds = remainingLectures * subject.avgLectureDurationSec;
+  subject.originalBacklogSeconds = subject.backlogSeconds;
+  saveState();
+  renderDashboard();
 };
 
 // Adjust Total Lectures manually
