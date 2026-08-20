@@ -584,17 +584,17 @@ function renderDashboard() {
         <div class="flex justify-between items-center pt-2 border-t border-slate-800/60" onclick="event.stopPropagation()">
           <div class="flex items-center gap-1.5">
             <span class="text-[10px] text-slate-400 font-medium">Watched:</span>
-            <div class="flex items-center gap-1 bg-obsidian-950 p-1 rounded-lg border border-slate-800">
+            <div class="flex items-center gap-1 bg-obsidian-950 p-0.5 rounded-lg border border-slate-800">
               <button onclick="adjustLectures(${idx}, -1)" class="w-4 h-4 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-[10px] font-bold transition-all">-</button>
-              <span class="font-mono font-bold text-xs text-white px-1">${compLectures}</span>
+              <input type="number" min="0" max="${totalLectures}" value="${compLectures}" onchange="updateSubjectLecturesDirectly(${idx}, this.value)" onclick="event.stopPropagation()" class="w-9 text-center font-mono font-bold text-xs text-white bg-transparent focus:outline-none focus:bg-obsidian-800 rounded p-0 cursor-pointer" />
               <button onclick="adjustLectures(${idx}, 1)" class="w-4 h-4 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-[10px] font-bold transition-all">+</button>
             </div>
           </div>
           <div class="flex items-center gap-1.5">
             <span class="text-[10px] text-slate-400 font-medium">Total:</span>
-            <div class="flex items-center gap-1 bg-obsidian-950 p-1 rounded-lg border border-slate-800">
+            <div class="flex items-center gap-1 bg-obsidian-950 p-0.5 rounded-lg border border-slate-800">
               <button onclick="adjustTotalLectures(${idx}, -1)" class="w-4 h-4 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-[10px] font-bold transition-all">-</button>
-              <span class="font-mono font-bold text-xs text-accent-cyan px-1">${totalLectures}</span>
+              <input type="number" min="0" value="${totalLectures}" onchange="updateSubjectTotalDirectly(${idx}, this.value)" onclick="event.stopPropagation()" class="w-9 text-center font-mono font-bold text-xs text-accent-cyan bg-transparent focus:outline-none focus:bg-obsidian-800 rounded p-0 cursor-pointer" />
               <button onclick="adjustTotalLectures(${idx}, 1)" class="w-4 h-4 rounded bg-obsidian-800 hover:bg-obsidian-700 text-slate-300 flex items-center justify-center text-[10px] font-bold transition-all">+</button>
             </div>
           </div>
@@ -662,6 +662,20 @@ window.adjustLectures = function(idx, delta) {
   }
 };
 
+window.updateSubjectLecturesDirectly = function(idx, val) {
+  const subject = state.subjects[idx];
+  if (!subject) return;
+  const newComp = Math.max(0, Math.min(subject.lecturesTotal, parseInt(val) || 0));
+  const actualDelta = newComp - subject.lecturesCompleted;
+  if (actualDelta !== 0) {
+    subject.lecturesCompleted = newComp;
+    const timeChange = actualDelta * subject.avgLectureDurationSec;
+    subject.backlogSeconds = Math.max(0, subject.backlogSeconds - timeChange);
+    saveState();
+    renderDashboard();
+  }
+};
+
 // Adjust Total Lectures manually
 window.adjustTotalLectures = function(idx, delta) {
   const subject = state.subjects[idx];
@@ -673,6 +687,20 @@ window.adjustTotalLectures = function(idx, delta) {
   subject.originalBacklogSeconds = subject.backlogSeconds;
   saveState();
   renderDashboard();
+};
+
+window.updateSubjectTotalDirectly = function(idx, val) {
+  const subject = state.subjects[idx];
+  if (!subject) return;
+  const newTotal = Math.max(subject.lecturesCompleted, parseInt(val) || 0);
+  if (newTotal !== subject.lecturesTotal) {
+    subject.lecturesTotal = newTotal;
+    const remaining = Math.max(0, subject.lecturesTotal - subject.lecturesCompleted);
+    subject.backlogSeconds = remaining * subject.avgLectureDurationSec;
+    subject.originalBacklogSeconds = subject.backlogSeconds;
+    saveState();
+    renderDashboard();
+  }
 };
 
 // Set Pomodoro focus subject directly from subject card click
