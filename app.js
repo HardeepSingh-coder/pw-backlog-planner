@@ -174,11 +174,18 @@ function loadState() {
         const sampleTot = parseInt(lecMatch[2]);
         const existing = state.subjects.find(s => s.name === sampleItem.subject);
         if (existing) {
-          if (sampleTot > existing.lecturesTotal) {
-            existing.lecturesTotal = sampleTot;
-          }
-          if (sampleComp > existing.lecturesCompleted) {
-            existing.lecturesCompleted = sampleComp;
+          if (existing.name === "Zoology by Aarushi Ma'am") {
+            existing.lecturesTotal = 13;
+            if (existing.lecturesCompleted < 6) {
+              existing.lecturesCompleted = 6;
+            }
+          } else {
+            if (sampleTot > existing.lecturesTotal) {
+              existing.lecturesTotal = sampleTot;
+            }
+            if (sampleComp > existing.lecturesCompleted) {
+              existing.lecturesCompleted = sampleComp;
+            }
           }
           const remaining = Math.max(0, existing.lecturesTotal - existing.lecturesCompleted);
           existing.backlogSeconds = remaining * existing.avgLectureDurationSec;
@@ -891,7 +898,7 @@ window.addEventListener("message", (event) => {
       const biologyEntryIndex = filteredData.findIndex(sub => sub.subject === "Zoology by Aarushi Ma'am");
       if (biologyEntryIndex !== -1) {
         const biologyEntry = filteredData[biologyEntryIndex];
-        let compLectures = 3;
+        let compLectures = 6;
         let totLectures = 13;
         let compDpp = 2;
         let totDpp = 11;
